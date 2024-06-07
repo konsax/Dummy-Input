@@ -1,0 +1,49 @@
+import re
+# Function to check three or more consecutive identical 
+# characters or numbers using regular expression
+def isValidGUID(str):
+ 
+    # Regex to check three or 
+    # more consecutive identical 
+    # characters or numbers 
+    regex = r"([a-zA-Z0-9])\1\1\1\1+"   #regex to find strings with 5 consequent chars like AT000000001
+    regex1 =r"(01234|12345|23456|34567|456789)"  #regex to find strings with 5 consequent digits like AT123400001
+    # Compile the ReGex
+    p = re.compile(regex)
+    p1= re.compile(regex1)
+    # If the string is empty 
+    # return false
+    if (str == None):
+        return False
+ 
+    # Return if the string 
+    # matched the ReGex
+    if(re.search(p, str)):
+        return True
+    elif(re.search(p1, str)):
+        return True
+    else:
+        return False
+    
+print(isValidGUID("0000AT1"))
+print(isValidGUID("12345A"))
+
+#reading data
+import pandas as pd
+df = pd.read_excel(r"Desktop\output SMP\kna1.XLSX")
+
+#converting vat data to string format(text format)
+#so they can be read by isValid Function
+
+df['STCD1']=df['STCD1'].apply(str)
+df['STCD2']=df['STCD2'].apply(str)
+df['STCEG']=df['STCEG'].apply(str)
+#using isValid function to find regex
+
+df['TAX1 flag'] = df['STCD1'].apply(isValidGUID)
+df['TAX2 flag'] = df['STCD2'].apply(isValidGUID)
+df['VAT flag'] = df['STCEG'].apply(isValidGUID)
+df = df.drop(df[(df['VAT flag'] == False) & (df['TAX1 flag'] == False) & (df['TAX2 flag'] == False)].index)
+
+#output to an excel file
+df.to_excel(r"Desktop\Dummy Vat check\dummies_found.xlsx")
